@@ -868,6 +868,7 @@ export function drawProblemDiagram(ctx, canvas, problem) {
     '购物策略': draw购物策略,
     '方阵问题': draw方阵问题,
     '周长围栏问题': draw周长围栏问题,
+    '周长与围栏问题': draw周长围栏问题,
   }
 
   // 题型别名映射（处理数据库中的变体名称）
@@ -896,6 +897,8 @@ export function drawProblemDiagram(ctx, canvas, problem) {
     '篱笆': '周长围栏问题',
     '周长问题': '周长围栏问题',
     '围栏问题': '周长围栏问题',
+    '周长与围栏问题': '周长围栏问题',
+    '周长与围栏': '周长围栏问题',
   }
 
   let resolvedType = type
