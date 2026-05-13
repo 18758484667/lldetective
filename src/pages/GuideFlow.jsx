@@ -149,19 +149,8 @@ function GuideFlow({ problem, showToast, onComplete, currentGrade }) {
 
   const invariant = problem.invariant || ''
 
-  // 获取题型对应的分层提示
-  const typeHints = invariantHints[problem.type] || invariantHints['default']
-  const currentHint = typeHints.hints[hintLevel] || typeHints.hints[typeHints.hints.length - 1]
-
-  const handlePrevHint = () => {
-    setHintLevel(Math.max(0, hintLevel - 1))
-  }
-
-  const handleNextHint = () => {
-    if (hintLevel < typeHints.hints.length - 1) {
-      setHintLevel(hintLevel + 1)
-    }
-  }
+  // 获取当前题型的提示配置
+  const currentHints = invariantHints[problem.type] || invariantHints['default']
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 animate-fade-in-up">
@@ -255,80 +244,64 @@ function GuideFlow({ problem, showToast, onComplete, currentGrade }) {
         {/* Step 2: Invariant */}
         {currentStep === 2 && (
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-deep-blue flex items-center gap-2">
-              <span>🔒</span> 第二步：{typeHints.title}
-            </h3>
+            <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-4">
+              <h3 className="text-lg font-bold text-amber-700 mb-2">
+                🔍 {currentHints.title}
+              </h3>
 
-            {/* 不变量描述 */}
-            {invariant && (
-              <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
-                <p className="text-sm text-gray-500 mb-1">🔑 不变量提示：</p>
-                <p className="text-base font-bold text-purple-700 leading-relaxed">{invariant}</p>
-              </div>
-            )}
+              {/* 不变量描述 */}
+              {invariant && (
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
+                  <p className="text-sm font-bold text-purple-700">{invariant}</p>
+                </div>
+              )}
 
-            {/* 分层引导提示 */}
-            <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-5 border border-amber-200">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-primary text-lg">💡</span>
-                <span className="text-sm font-bold text-deep-blue">
-                  线索 {hintLevel + 1} / {typeHints.hints.length}
-                </span>
-              </div>
-
-              <div className="min-h-[60px]">
-                <p className="text-base text-gray-800 leading-relaxed animate-fade-in-up">
-                  {currentHint}
+              {/* 逐层显示提示 */}
+              {currentHints.hints.slice(0, hintLevel).map((hint, i) => (
+                <p key={i} className="text-gray-700 my-2 pl-4 border-l-4 border-amber-400">
+                  {hint}
                 </p>
-              </div>
+              ))}
 
-              {/* 导航按钮 */}
-              <div className="flex items-center justify-between mt-4">
+              {/* 还有更多提示未显示时，显示"需要提示吗"按钮 */}
+              {hintLevel < currentHints.hints.length && (
                 <button
-                  onClick={handlePrevHint}
-                  disabled={hintLevel === 0}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
-                    hintLevel === 0
-                      ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                      : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 active:scale-95'
-                  }`}
+                  onClick={() => setHintLevel(hintLevel + 1)}
+                  className="mt-3 text-amber-600 underline hover:text-amber-800 font-medium"
                 >
-                  ← 上一条线索
+                  💡 需要提示吗？再点一下
                 </button>
-                <button
-                  onClick={handleNextHint}
-                  disabled={hintLevel >= typeHints.hints.length - 1}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
-                    hintLevel >= typeHints.hints.length - 1
-                      ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                      : 'bg-primary text-white hover:bg-primary-dark active:scale-95 shadow-sm'
-                  }`}
-                >
-                  下一条线索 →
-                </button>
-              </div>
+              )}
+
+              {/* 所有提示都显示了 */}
+              {hintLevel >= currentHints.hints.length && (
+                <p className="mt-3 text-green-600 font-medium">
+                  ✅ 提示已全部展开，你找到不变量了吗？
+                </p>
+              )}
             </div>
 
-            {/* 进度条 */}
-            <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full transition-all duration-300"
-                style={{ width: `${((hintLevel + 1) / typeHints.hints.length) * 100}%` }}
-              />
-            </div>
+            {/* 重置提示按钮 */}
+            <button
+              onClick={() => setHintLevel(0)}
+              className="text-sm text-gray-400 underline hover:text-gray-600"
+            >
+              重新隐藏提示
+            </button>
 
-            <div className="flex gap-3">
+            {/* 底部导航 */}
+            <div className="flex justify-between mt-6">
               <button
                 onClick={() => setCurrentStep(1)}
-                className="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition-all active:scale-95"
+                className="flex-1 bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 active:scale-95"
               >
                 ← 上一步
               </button>
               <button
-                onClick={() => setCurrentStep(3)}
-                className="flex-[2] bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-dark transition-all active:scale-95 shadow-md"
+                onClick={() => { setCurrentStep(3); setHintLevel(0); }}
+                className="flex-[2] bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-primary-dark active:scale-95 shadow-md ml-3"
               >
-                下一步 →
+                找到了，下一步 →
               </button>
             </div>
           </div>
