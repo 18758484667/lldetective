@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 const TYPE_COLORS = {
   '和差问题': '#3B82F6',
   '和差倍问题': '#3B82F6',
+  '周长围栏问题': '#059669',
   '倍数关系': '#10B981',
   '行程问题': '#8B5CF6',
   '鸡兔同笼': '#EF4444',

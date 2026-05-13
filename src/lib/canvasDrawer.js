@@ -757,6 +757,88 @@ function draw方阵问题(ctx, w, h, padding) {
   ctx.fillText(`总人数 = 每边人数 × 每边人数`, w / 2, midY + totalH / 2 + 36)
 }
 
+function draw周长围栏问题(ctx, w, h, padding) {
+  drawTitle(ctx, ctx.canvas, '📐 周长/围栏问题 - 示意图')
+  const midY = h / 2 - 5
+
+  // 画矩形花坛/场地
+  const rectW = Math.min(w - padding * 2, 200)
+  const rectH = Math.min(h * 0.45, 100)
+  const rx = (w - rectW) / 2
+  const ry = midY - rectH / 2
+
+  // 填充区域
+  ctx.fillStyle = '#FEF3C7'
+  ctx.beginPath()
+  ctx.roundRect(rx, ry, rectW, rectH, 6)
+  ctx.fill()
+
+  // 边框（围栏）
+  ctx.strokeStyle = '#92400E'
+  ctx.lineWidth = 4
+  ctx.beginPath()
+  ctx.roundRect(rx, ry, rectW, rectH, 6)
+  ctx.stroke()
+
+  // 标注长和宽
+  // 长（底部标注）
+  ctx.strokeStyle = COLORS.blue
+  ctx.lineWidth = 1.5
+  ctx.beginPath()
+  ctx.moveTo(rx, ry + rectH + 8)
+  ctx.lineTo(rx + rectW, ry + rectH + 8)
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(rx, ry + rectH + 5)
+  ctx.lineTo(rx, ry + rectH + 11)
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(rx + rectW, ry + rectH + 5)
+  ctx.lineTo(rx + rectW, ry + rectH + 11)
+  ctx.stroke()
+  ctx.fillStyle = COLORS.blue
+  ctx.font = 'bold 13px sans-serif'
+  ctx.textAlign = 'center'
+  ctx.fillText('长', rx + rectW / 2, ry + rectH + 24)
+
+  // 宽（右侧标注）
+  ctx.strokeStyle = COLORS.green
+  ctx.lineWidth = 1.5
+  ctx.beginPath()
+  ctx.moveTo(rx + rectW + 8, ry + rectH)
+  ctx.lineTo(rx + rectW + 8, ry)
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(rx + rectW + 5, ry + rectH)
+  ctx.lineTo(rx + rectW + 11, ry + rectH)
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(rx + rectW + 5, ry)
+  ctx.lineTo(rx + rectW + 11, ry)
+  ctx.stroke()
+  ctx.fillStyle = COLORS.green
+  ctx.font = 'bold 13px sans-serif'
+  ctx.textAlign = 'left'
+  ctx.fillText('宽', rx + rectW + 12, (ry + ry + rectH) / 2 + 5)
+
+  // 篱笆标注（围栏）
+  ctx.fillStyle = '#92400E'
+  ctx.font = 'bold 12px sans-serif'
+  ctx.textAlign = 'center'
+  ctx.fillText('🪵 围栏/篱笆', w / 2, ry - 12)
+
+  // 周长公式
+  ctx.fillStyle = COLORS.amber
+  ctx.font = 'bold 13px sans-serif'
+  ctx.textAlign = 'center'
+  ctx.fillText('周长 = (长 + 宽) × 2', w / 2, h - 25)
+
+  // 如果一面靠墙
+  ctx.fillStyle = '#1E3A5F'
+  ctx.font = '11px sans-serif'
+  ctx.fillText('如果一面靠墙，篱笆只围三边：长 + 宽 × 2 或 长 × 2 + 宽', w / 2, h - 8)
+}
+
 /* --- 主绘图函数 --- */
 export function drawProblemDiagram(ctx, canvas, problem) {
   const w = canvas.width
@@ -785,6 +867,7 @@ export function drawProblemDiagram(ctx, canvas, problem) {
     '等量代换': draw等量代换,
     '购物策略': draw购物策略,
     '方阵问题': draw方阵问题,
+    '周长围栏问题': draw周长围栏问题,
   }
 
   // 题型别名映射（处理数据库中的变体名称）
@@ -808,6 +891,11 @@ export function drawProblemDiagram(ctx, canvas, problem) {
     '等量代换': '等量代换',
     '购物': '购物策略',
     '方阵': '方阵问题',
+    '周长': '周长围栏问题',
+    '围栏': '周长围栏问题',
+    '篱笆': '周长围栏问题',
+    '周长问题': '周长围栏问题',
+    '围栏问题': '周长围栏问题',
   }
 
   let resolvedType = type
