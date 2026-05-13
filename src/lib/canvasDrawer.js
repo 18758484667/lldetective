@@ -24,7 +24,7 @@ const COLORS = {
 function drawBox(ctx, x, y, w, h, color, label, labelColor) {
   ctx.fillStyle = color
   ctx.beginPath()
-  ctx.roundRect(x, y, w, h, 4)
+  ctx.rect(x, y, w, h)
   ctx.fill()
   if (label) {
     ctx.fillStyle = labelColor || '#1E293B'
@@ -442,9 +442,7 @@ function draw工程问题(ctx, w, h, padding) {
 
   // 总工作量
   ctx.fillStyle = '#E2E8F0'
-  ctx.beginPath()
-  ctx.roundRect(padding, midY - 15, barW, barH, 8)
-  ctx.fill()
+  ctx.fillRect(padding, midY - 15, barW, barH)
   ctx.fillStyle = '#94A3B8'
   ctx.font = '11px sans-serif'
   ctx.textAlign = 'center'
@@ -455,9 +453,7 @@ function draw工程问题(ctx, w, h, padding) {
   // 完成部分（蓝色进度条）
   const doneRatio = 0.4
   ctx.fillStyle = COLORS.blue
-  ctx.beginPath()
-  ctx.roundRect(padding, midY - 15, barW * doneRatio, barH, [8, 0, 0, 8])
-  ctx.fill()
+  ctx.fillRect(padding, midY - 15, barW * doneRatio, barH)
 
   ctx.fillStyle = 'white'
   ctx.font = 'bold 12px sans-serif'
@@ -481,9 +477,7 @@ function draw分数应用题(ctx, w, h, padding) {
 
   // 总长度（单位1）
   ctx.fillStyle = '#E2E8F0'
-  ctx.beginPath()
-  ctx.roundRect(padding, midY - 8, barW, 16, 4)
-  ctx.fill()
+  ctx.fillRect(padding, midY - 8, barW, 16)
   ctx.fillStyle = COLORS.gray
   ctx.font = 'bold 12px sans-serif'
   ctx.textAlign = 'center'
@@ -523,9 +517,7 @@ function draw百分数应用题(ctx, w, h, padding) {
 
   // 100% 进度条
   ctx.fillStyle = '#E2E8F0'
-  ctx.beginPath()
-  ctx.roundRect(padding, midY - 10, barW, 20, 10)
-  ctx.fill()
+  ctx.fillRect(padding, midY - 10, barW, 20)
 
   // 分段
   const segments = [
@@ -538,19 +530,7 @@ function draw百分数应用题(ctx, w, h, padding) {
   segments.forEach((seg) => {
     const segW = (seg.pct / 100) * barW
     ctx.fillStyle = seg.color
-    ctx.beginPath()
-    const isFirst = curX === padding
-    const isLast = curX + segW >= padding + barW - 1
-    if (isFirst && isLast) {
-      ctx.roundRect(curX, midY - 10, segW, 20, 10)
-    } else if (isFirst) {
-      ctx.roundRect(curX, midY - 10, segW, 20, [10, 0, 0, 10])
-    } else if (isLast) {
-      ctx.roundRect(curX, midY - 10, segW, 20, [0, 10, 10, 0])
-    } else {
-      ctx.rect(curX, midY - 10, segW, 20)
-    }
-    ctx.fill()
+    ctx.fillRect(curX, midY - 10, segW, 20)
 
     ctx.fillStyle = 'white'
     ctx.font = 'bold 10px sans-serif'
@@ -618,9 +598,7 @@ function draw周期问题(ctx, w, h, padding) {
     const c = colors[i % colors.length]
     ctx.fillStyle = c
     ctx.globalAlpha = 0.3
-    ctx.beginPath()
-    ctx.roundRect(x, midY - 10, itemW, 24, 6)
-    ctx.fill()
+    ctx.fillRect(x, midY - 10, itemW, 24)
     ctx.globalAlpha = 1
     ctx.fillStyle = '#1E293B'
     ctx.font = 'bold 11px sans-serif'
@@ -770,14 +748,14 @@ function draw周长围栏问题(ctx, w, h, padding) {
   // 填充区域
   ctx.fillStyle = '#FEF3C7'
   ctx.beginPath()
-  ctx.roundRect(rx, ry, rectW, rectH, 6)
+  ctx.rect(rx, ry, rectW, rectH)
   ctx.fill()
 
   // 边框（围栏）
   ctx.strokeStyle = '#92400E'
   ctx.lineWidth = 4
   ctx.beginPath()
-  ctx.roundRect(rx, ry, rectW, rectH, 6)
+  ctx.rect(rx, ry, rectW, rectH)
   ctx.stroke()
 
   // 标注长和宽
