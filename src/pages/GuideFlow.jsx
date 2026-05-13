@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import Celebration from '../components/Celebration'
 import { drawProblemDiagram } from '../lib/canvasDrawer'
+import invariantHints from '../data/invariantHints'
 
 const STEPS = [
   { num: 1, label: '理解题意' },
@@ -43,6 +44,7 @@ function GuideFlow({ problem, showToast, onComplete, currentGrade }) {
   const [answers, setAnswers] = useState({})
   const [results, setResults] = useState({})
   const [showCelebration, setShowCelebration] = useState(false)
+  const [hintLevel, setHintLevel] = useState(0)
 
   const rawAnswer = problem.answer
   let answerDefs = []
@@ -147,6 +149,20 @@ function GuideFlow({ problem, showToast, onComplete, currentGrade }) {
 
   const invariant = problem.invariant || ''
 
+  // 获取题型对应的分层提示
+  const typeHints = invariantHints[problem.type] || invariantHints['default']
+  const currentHint = typeHints.hints[hintLevel] || typeHints.hints[typeHints.hints.length - 1]
+
+  const handlePrevHint = () => {
+    setHintLevel(Math.max(0, hintLevel - 1))
+  }
+
+  const handleNextHint = () => {
+    if (hintLevel < typeHints.hints.length - 1) {
+      setHintLevel(hintLevel + 1)
+    }
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 animate-fade-in-up">
       {/* Step Progress Bar */}
@@ -240,20 +256,67 @@ function GuideFlow({ problem, showToast, onComplete, currentGrade }) {
         {currentStep === 2 && (
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-deep-blue flex items-center gap-2">
-              <span>🔒</span> 第二步：找不变量
+              <span>🔒</span> 第二步：{typeHints.title}
             </h3>
-            <div className="bg-purple-50 rounded-xl p-5 border border-purple-200">
-              <p className="text-sm text-gray-500 mb-2">🔑 题目中的不变量：</p>
-              <p className="text-lg font-bold text-purple-700 leading-relaxed">
-                {invariant || '（无明确不变量，关注数量关系的变化规律）'}
-              </p>
+
+            {/* 不变量描述 */}
+            {invariant && (
+              <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                <p className="text-sm text-gray-500 mb-1">🔑 不变量提示：</p>
+                <p className="text-base font-bold text-purple-700 leading-relaxed">{invariant}</p>
+              </div>
+            )}
+
+            {/* 分层引导提示 */}
+            <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-5 border border-amber-200">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-primary text-lg">💡</span>
+                <span className="text-sm font-bold text-deep-blue">
+                  线索 {hintLevel + 1} / {typeHints.hints.length}
+                </span>
+              </div>
+
+              <div className="min-h-[60px]">
+                <p className="text-base text-gray-800 leading-relaxed animate-fade-in-up">
+                  {currentHint}
+                </p>
+              </div>
+
+              {/* 导航按钮 */}
+              <div className="flex items-center justify-between mt-4">
+                <button
+                  onClick={handlePrevHint}
+                  disabled={hintLevel === 0}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
+                    hintLevel === 0
+                      ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 active:scale-95'
+                  }`}
+                >
+                  ← 上一条线索
+                </button>
+                <button
+                  onClick={handleNextHint}
+                  disabled={hintLevel >= typeHints.hints.length - 1}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
+                    hintLevel >= typeHints.hints.length - 1
+                      ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                      : 'bg-primary text-white hover:bg-primary-dark active:scale-95 shadow-sm'
+                  }`}
+                >
+                  下一条线索 →
+                </button>
+              </div>
             </div>
-            <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
-              <p className="text-sm text-gray-500 mb-1">💡 侦探小贴士：</p>
-              <p className="text-sm text-gray-700">
-                不变量是解题的关键线索！找到题目中不变的数量，就能找到突破口。
-              </p>
+
+            {/* 进度条 */}
+            <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all duration-300"
+                style={{ width: `${((hintLevel + 1) / typeHints.hints.length) * 100}%` }}
+              />
             </div>
+
             <div className="flex gap-3">
               <button
                 onClick={() => setCurrentStep(1)}
