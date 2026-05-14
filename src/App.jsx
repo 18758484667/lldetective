@@ -3,13 +3,15 @@ import HomePage from './pages/HomePage'
 import AnalyzePage from './pages/AnalyzePage'
 import GuideFlow from './pages/GuideFlow'
 import HistoryPage from './pages/HistoryPage'
+import AISettings from './components/AISettings'
 import Toast from './components/Toast'
 import { analyzeProblem } from './lib/problemAnalyzer'
+import { hasAIConfig } from './lib/aiAnalyzer'
 
 const PAGE_ICONS = {
   home: '🏠',
   history: '📋',
-  settings: '⚙️',
+  aiSettings: '🤖',
 }
 
 function App() {
@@ -26,12 +28,18 @@ function App() {
   })
   const [selectedProblem, setSelectedProblem] = useState(null)
   const [toast, setToast] = useState(null)
+  const [analyzing, setAnalyzing] = useState(false)
+  const [aiConfigured, setAiConfigured] = useState(hasAIConfig())
 
   useEffect(() => {
     try {
       localStorage.setItem('lldetective_config', JSON.stringify({ grade: currentGrade }))
     } catch {}
   }, [currentGrade])
+
+  const refreshAiStatus = useCallback(() => {
+    setAiConfigured(hasAIConfig())
+  }, [])
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type })
@@ -42,11 +50,19 @@ function App() {
     setCurrentPage('analyze')
   }, [])
 
-  const handleCustomProblem = useCallback((text) => {
-    const analyzed = analyzeProblem(text)
-    setSelectedProblem(analyzed)
-    setCurrentPage('analyze')
-  }, [])
+  const handleCustomProblem = useCallback(async (text) => {
+    setAnalyzing(true)
+    try {
+      const analyzed = await analyzeProblem(text)
+      setSelectedProblem(analyzed)
+      setCurrentPage('analyze')
+    } catch (err) {
+      console.error('分析失败:', err)
+      showToast('分析失败，请重试', 'error')
+    } finally {
+      setAnalyzing(false)
+    }
+  }, [showToast])
 
   const handleBackHome = useCallback(() => {
     setSelectedProblem(null)
@@ -83,33 +99,43 @@ function App() {
           <span className="text-2xl">🔍</span>
           <h1 className="text-xl font-bold tracking-wide">线线侦探社</h1>
         </div>
-        {currentPage === 'home' && (
-          <div className="flex items-center gap-1">
-            <span className="text-sm text-amber-200">年级</span>
-            <select
-              value={currentGrade}
-              onChange={(e) => {
-                setCurrentGrade(Number(e.target.value))
-                setSelectedProblem(null)
-              }}
-              className="bg-amber-400 text-deep-blue font-bold rounded-lg px-3 py-1.5 text-sm border-none outline-none cursor-pointer"
+        <div className="flex items-center gap-2">
+          {currentPage === 'home' && (
+            <>
+              <span className="text-sm text-amber-200">年级</span>
+              <select
+                value={currentGrade}
+                onChange={(e) => {
+                  setCurrentGrade(Number(e.target.value))
+                  setSelectedProblem(null)
+                }}
+                className="bg-amber-400 text-deep-blue font-bold rounded-lg px-3 py-1.5 text-sm border-none outline-none cursor-pointer"
+              >
+                {[1, 2, 3, 4, 5, 6].map((g) => (
+                  <option key={g} value={g}>{g}年级</option>
+                ))}
+              </select>
+              {/* AI 配置入口 */}
+              <button
+                onClick={() => setCurrentPage('aiSettings')}
+                className={`text-lg p-1 rounded-lg transition-all hover:scale-110 active:scale-95 ${
+                  aiConfigured ? 'text-green-300' : 'text-white/60'
+                }`}
+                title={aiConfigured ? 'AI已配置' : '配置AI增强分析'}
+              >
+                🤖
+              </button>
+            </>
+          )}
+          {currentPage !== 'home' && (
+            <button
+              onClick={handleBackHome}
+              className="bg-amber-400 text-deep-blue px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-amber-300 transition-all hover:scale-105 active:scale-95"
             >
-              {[1, 2, 3, 4, 5, 6].map((g) => (
-                <option key={g} value={g}>
-                  {g}年级
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-        {currentPage !== 'home' && (
-          <button
-            onClick={handleBackHome}
-            className="bg-amber-400 text-deep-blue px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-amber-300 transition-all hover:scale-105 active:scale-95"
-          >
-            ← 返回
-          </button>
-        )}
+              ← 返回
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Main Content */}
@@ -121,6 +147,7 @@ function App() {
             onSelectProblem={handleSelectProblem}
             onCustomProblem={handleCustomProblem}
             showToast={showToast}
+            analyzing={analyzing}
           />
         )}
         {currentPage === 'analyze' && selectedProblem && (
@@ -139,6 +166,13 @@ function App() {
           />
         )}
         {currentPage === 'history' && <HistoryPage showToast={showToast} />}
+        {currentPage === 'aiSettings' && (
+          <AISettings
+            onBack={() => setCurrentPage('home')}
+            onConfigChange={refreshAiStatus}
+            showToast={showToast}
+          />
+        )}
       </main>
 
       {/* Bottom Navigation */}

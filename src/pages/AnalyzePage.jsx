@@ -62,9 +62,14 @@ function AnalyzePage({ problem, onStartGuide, onBack }) {
             {'⭐'.repeat(Math.min(5, Math.max(1, problem.difficulty)))}
           </span>
         )}
-        {problem.autoAnalyzed && (
+        {problem.autoAnalyzed && !problem.aiEnhanced && (
           <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
             自动识别
+          </span>
+        )}
+        {problem.aiEnhanced && (
+          <span className="text-xs text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+            <span>🤖</span> AI 增强
           </span>
         )}
       </div>

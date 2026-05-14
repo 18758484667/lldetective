@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
 const TYPE_COLORS = {
+  '图形与几何': '#6366F1',
+  '综合问题': '#6B7280',
   '和差问题': '#3B82F6',
   '和差倍问题': '#3B82F6',
   '周长围栏问题': '#059669',

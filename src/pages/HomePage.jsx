@@ -2,7 +2,7 @@ import { useState } from 'react'
 import GradeSelector from '../components/GradeSelector'
 import ProblemList from '../components/ProblemList'
 
-function HomePage({ currentGrade, onGradeChange, onSelectProblem, onCustomProblem, showToast }) {
+function HomePage({ currentGrade, onGradeChange, onSelectProblem, onCustomProblem, showToast, analyzing }) {
   const [customText, setCustomText] = useState('')
   const charLimit = 500
 
@@ -20,6 +20,7 @@ function HomePage({ currentGrade, onGradeChange, onSelectProblem, onCustomProble
   }
 
   const handleSubmit = () => {
+    if (analyzing) return
     const trimmed = customText.trim()
     if (!trimmed) {
       showToast('请输入题目内容', 'error')
@@ -88,9 +89,17 @@ function HomePage({ currentGrade, onGradeChange, onSelectProblem, onCustomProble
           </button>
           <button
             onClick={handleSubmit}
-            className="flex-[2] bg-primary text-white py-2.5 rounded-xl text-sm font-bold hover:bg-primary-dark transition-all hover:scale-[1.02] active:scale-95 shadow-md shadow-primary/30"
+            disabled={analyzing}
+            className="flex-[2] bg-primary text-white py-2.5 rounded-xl text-sm font-bold hover:bg-primary-dark transition-all hover:scale-[1.02] active:scale-95 shadow-md shadow-primary/30 disabled:opacity-60 disabled:hover:scale-100"
           >
-            🔍 开始分析
+            {analyzing ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                分析中...
+              </span>
+            ) : (
+              '🔍 开始分析'
+            )}
           </button>
         </div>
       </div>
