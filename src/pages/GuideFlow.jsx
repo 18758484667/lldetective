@@ -205,6 +205,23 @@ function GuideFlow({ problem, showToast, onComplete, currentGrade }) {
 
       {/* Step Content */}
       <div className="bg-white rounded-2xl shadow-md p-6">
+        {/* 原题摘要（每步都显示） */}
+        <details className="mb-4 group">
+          <summary className="cursor-pointer text-xs text-gray-400 hover:text-deep-blue font-medium list-none flex items-center gap-1 select-none">
+            <span className="transition-transform group-open:rotate-90">▶</span>
+            <span>查看原题</span>
+            <span className="text-gray-300 font-normal truncate ml-1 flex-1">—— {problem.text.slice(0, 30)}...</span>
+          </summary>
+          <div className="mt-3 bg-amber-50 rounded-xl p-3 border border-amber-200">
+            <p className="text-sm text-gray-800 leading-relaxed">{problem.text}</p>
+            {problem.question && problem.question !== problem.text && (
+              <p className="text-sm font-bold text-deep-blue mt-2 border-t border-amber-200 pt-2">
+                ❓ 问题：{problem.question}
+              </p>
+            )}
+          </div>
+        </details>
+
         {/* Step 1: Understand */}
         {currentStep === 1 && (
           <div className="space-y-4">
